@@ -26,5 +26,33 @@ BookingSystem/
 │   ├── .env.example        # Mẫu biến môi trường
 │   └── requirements.txt    # Danh sách thư viện
 └── frontend/               # Mã nguồn Frontend (Coming soon)
+```
+## ⚙️ Hướng dẫn cài đặt
 
-## Hướng dẫn cài đặt 
+**Yêu cầu:**
+* Đã cài đặt Python (phiên bản 3.10 trở lên).
+* Đã cài đặt PostgreSQL và tạo một database rỗng tên là booking_db.
+
+**Thiết lập môi trường ảo:**
+* Đối với window:
+```text
+python -m venv venv
+.\venv\Scripts\activate
+```
+* Đối với macOS/Linux:
+```text
+python3 -m venv venv
+source venv/bin/activate
+```
+
+**Cài đặt thư viện:**
+```text
+pip install -r requirements.txt
+```
+
+**Cấu hình biến môi trường (.env):**
+```text
+DATABASE_URL
+SECRET_KEY
+```
+  
