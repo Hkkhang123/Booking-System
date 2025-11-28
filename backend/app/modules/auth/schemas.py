@@ -30,3 +30,10 @@ class UserResponse(BaseModel):
 class Token(BaseModel):  # Schema tra ve token
     access_token: str
     token_type: str
+
+
+class UserUpdateAdmin(BaseModel):
+    full_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    is_active: Optional[bool] = None  # Để khóa tài khoản
+    role: Optional[str] = None  # Để phân quyền

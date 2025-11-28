@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from uuid import UUID
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from app.core.database import get_db
@@ -86,3 +87,61 @@ def get_users(
 
     users = query.offset(skip).limit(limit).all()
     return users
+
+# API sửa thông tin user (dành cho admin)
+
+
+@router.put("/users/{user_id}", response_model=schemas.UserResponse)
+def update_user_admin(
+    user_id: UUID,
+    user_update: schemas.UserUpdateAdmin,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_admin)
+):
+    # Tìm user cần sửa
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User không tồn tại.")
+
+    # Cập nhật từng trường (nếu có)
+    if user_update.full_name is not None:
+        user.full_name = user_update.full_name
+    if user_update.phone_number is not None:
+        user.phone_number = user_update.phone_number
+    if user_update.is_active is not None:
+        user.is_active = user_update.is_active
+    if user_update.role is not None:
+        # Kiểm tra role hợp lệ
+        if user_update.role not in ["user", "admin", "doctor"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Role không hợp lệ.")
+        user.role = user_update.role
+
+    db.commit()
+    db.refresh(user)
+    return user
+
+# API xóa user (dành cho admin)
+
+
+@router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user_admin(
+    user_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_admin)
+):
+    """Xóa user theo ID (dành cho admin)"""
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User không tồn tại.")
+
+    # Chặn không cho tự xóa chính mình
+    if user.id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Không thể xóa chính mình.")
+
+    db.delete(user)
+    db.commit()
+    return None
