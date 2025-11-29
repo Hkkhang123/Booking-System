@@ -1,20 +1,24 @@
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core import security
 from app.modules.auth import models
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+
+security_scheme = HTTPBearer()
 
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+def get_current_user(token_obj: HTTPAuthorizationCredentials = Depends(security_scheme), db: Session = Depends(get_db)):
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Token không hợp lệ hoặc đã hết hạn",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
+    token = token_obj.credentials
 
     try:
         # Giai ma token

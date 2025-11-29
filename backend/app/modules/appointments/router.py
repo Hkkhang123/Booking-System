@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List
 
 from app.core.database import get_db
@@ -45,8 +45,12 @@ def create_appointment(booking_in: schemas.AppointmentCreate,
 
     start_time = booking_in.start_time  # datetime object
 
+    if start_time.tzinfo is not None:
+        # Nếu start_time chưa có timezone, gắn timezone UTC cho nó
+        start_time = start_time.replace(tzinfo=timezone.utc)
+
     # Kiểm tra không được đặt lịch trong quá khứ
-    if start_time < datetime.utcnow():
+    if start_time < datetime.now(timezone.utc):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Không thể đặt lịch trong quá khứ.")
 
