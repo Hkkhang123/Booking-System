@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, ForeignKey, DateTime
+from sqlalchemy import Column, String, ForeignKey, DateTime, Text, Float
 from sqlalchemy.orm import relationship
 from app.core.model_base import BaseModel
 from sqlalchemy.dialects.postgresql import UUID
@@ -21,8 +21,19 @@ class Appointment(BaseModel):
 
     # Trạng thái và ghi chú
     # Trạng thái: pending, confirmed, canceled, completed
-    status = Column(String(20), nullable=False, default="pending")
-    reason = Column(String(255), nullable=True)  # Lý do khám
+    status = Column(String(20), default="pending")
+    reason = Column(Text, nullable=False)  # Lý do khám
+
+    paid_price = Column(Float, nullable=False, default=0.0)
+
+    paid_method = Column(String(50), default="cash")
+
+    payment_status = Column(String(50), default="unpaid")
+
+    # Ghi chú của bác sĩ sau khi khám
+    doctor_note = Column(Text, nullable=True)
+
+    refund_amount = Column(Float, default=0.0)
 
     # Quan hệ ngược để lấy thông tin chi tiết
     patient = relationship(
